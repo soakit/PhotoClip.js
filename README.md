@@ -18,7 +18,9 @@ IE10及以上版本，Chrome、Firefox、Safari、Android、微信等主流先�
 
 [**iscroll-zoom.js**](https://github.com/cubiq/iscroll)   
 [**hammer.js**](https://github.com/hammerjs/hammer.js)  
-[**lrz.all.bundle.js**](https://github.com/think2011/localResizeIMG) 
+~~[**lrz.all.bundle.js**](https://github.com/think2011/localResizeIMG)~~
+
+>**本Fork项目去掉了lrz的依赖，依赖FileReader（IE10+）**
 
 由于 iscroll 原插件的 zoom 扩展存在几处 bug，所以建议使用 demo 中提供的 iscroll-zoom.js 文件，本人已经将这些 bug 修复，并针对本插件做了优化。
 

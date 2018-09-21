@@ -1,6 +1,5 @@
 import Hammer from 'hammerjs';
 import IScroll from 'iscroll/build/iscroll-zoom';
-import lrz from 'lrz';
 import bind from '@module-factory/utils/bind';
 import destroy from '@module-factory/utils/destroy';
 import extend from '@module-factory/utils/extend';
@@ -40,11 +39,6 @@ let defaultOptions = {
     loadError: noop,
     done: noop,
     fail: noop,
-    lrzOption: {
-        width: is_android ? 1000 : undefined,
-        height: is_android ? 1000 : undefined,
-        quality: .7
-    },
     style: {
         maskColor: 'rgba(0,0,0,.5)',
         maskBorder: '2px dashed #ddd',
@@ -183,7 +177,7 @@ export default class PhotoClip {
         }
 
         if (this._options.img) {
-            this._lrzHandle(this._options.img);
+            this.handleFile(this._options.img);
         }
     }
 
@@ -605,11 +599,11 @@ export default class PhotoClip {
         const files = e.target.files;
 
         if (files.length) {
-            this._lrzHandle(files[0]);
+            this.handleFile(files[0]);
         }
     }
 
-    _lrzHandle(src) {
+    handleFile(src) {
         const options = this._options,
             errorMsg = options.errorMsg;
 
@@ -621,20 +615,19 @@ export default class PhotoClip {
         this._imgLoaded = false;
         options.loadStart.call(this, src);
 
-        try {
-            lrz(src, options.lrzOption)
-                .then(rst => {
-                    // 处理成功会执行
-                    this._clearImg();
-                    this._createImg(rst.base64);
-                })
-                .catch(err => {
-                    // 处理失败会执行
-                    options.loadError.call(this, errorMsg.imgHandleError, err);
-                });
-        } catch(err) {
-            options.loadError.call(this, errorMsg.imgHandleError, err);
-            throw err;
+        if (typeof src === 'string') {
+            this._clearImg();
+            this._createImg(src);
+        } else {
+            var reader = new FileReader();
+            reader.readAsDataURL(src);
+            reader.onload = () => {
+                this._clearImg();
+                this._createImg(reader.result);
+            };
+            reader.onerror = (err) => {
+                options.loadError.call(this, errorMsg.imgHandleError, err);
+            };
         }
     }
 
@@ -844,7 +837,7 @@ export default class PhotoClip {
      * @return {PhotoClip}         返回 PhotoClip 的实例对象
      */
     load(src) {
-        this._lrzHandle(src);
+        this.handleFile(src);
         return this;
     }
 

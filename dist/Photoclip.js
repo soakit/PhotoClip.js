@@ -8,14 +8,14 @@
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("hammerjs"), require("iscroll/build/iscroll-zoom"), require("lrz"));
+		module.exports = factory(require("hammerjs"), require("iscroll/build/iscroll-zoom"));
 	else if(typeof define === 'function' && define.amd)
-		define(["hammerjs", "iscroll", "lrz"], factory);
+		define(["hammerjs", "iscroll"], factory);
 	else if(typeof exports === 'object')
-		exports["PhotoClip"] = factory(require("hammerjs"), require("iscroll/build/iscroll-zoom"), require("lrz"));
+		exports["PhotoClip"] = factory(require("hammerjs"), require("iscroll/build/iscroll-zoom"));
 	else
-		root["PhotoClip"] = factory(root["Hammer"], root["IScroll"], root["lrz"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__6__, __WEBPACK_EXTERNAL_MODULE__7__) {
+		root["PhotoClip"] = factory(root["Hammer"], root["IScroll"]);
+})(window, function(__WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__6__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -228,19 +228,15 @@ var _iscrollZoom = __webpack_require__(6);
 
 var _iscrollZoom2 = _interopRequireDefault(_iscrollZoom);
 
-var _lrz = __webpack_require__(7);
-
-var _lrz2 = _interopRequireDefault(_lrz);
-
-var _bind = __webpack_require__(8);
+var _bind = __webpack_require__(7);
 
 var _bind2 = _interopRequireDefault(_bind);
 
-var _destroy2 = __webpack_require__(9);
+var _destroy2 = __webpack_require__(8);
 
 var _destroy3 = _interopRequireDefault(_destroy2);
 
-var _extend = __webpack_require__(10);
+var _extend = __webpack_require__(9);
 
 var _extend2 = _interopRequireDefault(_extend);
 
@@ -252,11 +248,11 @@ var _isArray = __webpack_require__(0);
 
 var _isArray2 = _interopRequireDefault(_isArray);
 
-var _createElement = __webpack_require__(14);
+var _createElement = __webpack_require__(13);
 
 var _createElement2 = _interopRequireDefault(_createElement);
 
-var _removeElement = __webpack_require__(15);
+var _removeElement = __webpack_require__(14);
 
 var _removeElement2 = _interopRequireDefault(_removeElement);
 
@@ -264,19 +260,19 @@ var _hideAction = __webpack_require__(3);
 
 var _hideAction2 = _interopRequireDefault(_hideAction);
 
-var _css = __webpack_require__(16);
+var _css = __webpack_require__(15);
 
 var _css2 = _interopRequireDefault(_css);
 
-var _attr = __webpack_require__(17);
+var _attr = __webpack_require__(16);
 
 var _attr2 = _interopRequireDefault(_attr);
 
-var _$ = __webpack_require__(18);
+var _$ = __webpack_require__(17);
 
 var _$2 = _interopRequireDefault(_$);
 
-var _utils = __webpack_require__(20);
+var _utils = __webpack_require__(19);
 
 var utils = _interopRequireWildcard(_utils);
 
@@ -312,11 +308,6 @@ var defaultOptions = {
     loadError: noop,
     done: noop,
     fail: noop,
-    lrzOption: {
-        width: is_android ? 1000 : undefined,
-        height: is_android ? 1000 : undefined,
-        quality: .7
-    },
     style: {
         maskColor: 'rgba(0,0,0,.5)',
         maskBorder: '2px dashed #ddd',
@@ -449,7 +440,7 @@ var PhotoClip = function () {
             }
 
             if (this._options.img) {
-                this._lrzHandle(this._options.img);
+                this.handleFile(this._options.img);
             }
         }
     }, {
@@ -899,12 +890,12 @@ var PhotoClip = function () {
             var files = e.target.files;
 
             if (files.length) {
-                this._lrzHandle(files[0]);
+                this.handleFile(files[0]);
             }
         }
     }, {
-        key: '_lrzHandle',
-        value: function _lrzHandle(src) {
+        key: 'handleFile',
+        value: function handleFile(src) {
             var _this5 = this;
 
             var options = this._options,
@@ -918,18 +909,19 @@ var PhotoClip = function () {
             this._imgLoaded = false;
             options.loadStart.call(this, src);
 
-            try {
-                (0, _lrz2.default)(src, options.lrzOption).then(function (rst) {
-                    // 处理成功会执行
+            if (typeof src === 'string') {
+                this._clearImg();
+                this._createImg(src);
+            } else {
+                var reader = new FileReader();
+                reader.readAsDataURL(src);
+                reader.onload = function () {
                     _this5._clearImg();
-                    _this5._createImg(rst.base64);
-                }).catch(function (err) {
-                    // 处理失败会执行
+                    _this5._createImg(reader.result);
+                };
+                reader.onerror = function (err) {
                     options.loadError.call(_this5, errorMsg.imgHandleError, err);
-                });
-            } catch (err) {
-                options.loadError.call(this, errorMsg.imgHandleError, err);
-                throw err;
+                };
             }
         }
     }, {
@@ -1150,7 +1142,7 @@ var PhotoClip = function () {
     }, {
         key: 'load',
         value: function load(src) {
-            this._lrzHandle(src);
+            this.handleFile(src);
             return this;
         }
 
@@ -1325,12 +1317,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__6__;
 
 /***/ }),
 /* 7 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__7__;
-
-/***/ }),
-/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1347,7 +1333,7 @@ module.exports = function (context) {
 };
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1363,7 +1349,7 @@ module.exports = function (context) {
 };
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1371,9 +1357,9 @@ module.exports = function (context) {
 
 var isArray = __webpack_require__(0);
 var isObject = __webpack_require__(1);
-var isBoolean = __webpack_require__(11);
-var isFunction = __webpack_require__(12);
-var isPlainObject = __webpack_require__(13);
+var isBoolean = __webpack_require__(10);
+var isFunction = __webpack_require__(11);
+var isPlainObject = __webpack_require__(12);
 
 module.exports = function extend() {
     var options = void 0,
@@ -1446,7 +1432,7 @@ module.exports = function extend() {
 };
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1458,7 +1444,7 @@ module.exports = function (bool) {
 };
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1470,7 +1456,7 @@ module.exports = function (func) {
 };
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1482,7 +1468,7 @@ module.exports = function (obj) {
 };
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1519,7 +1505,7 @@ module.exports = function (parentNode, className, id, prop) {
 };
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1531,7 +1517,7 @@ module.exports = function (elem) {
 };
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1577,7 +1563,7 @@ module.exports = function (elem, prop, value) {
 };
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1603,7 +1589,7 @@ module.exports = function (elem, prop, value) {
 };
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1611,7 +1597,7 @@ module.exports = function (elem, prop, value) {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var toArray = __webpack_require__(19);
+var toArray = __webpack_require__(18);
 
 // 获取元素（IE8及以上浏览器）
 module.exports = function (selector, context) {
@@ -1635,7 +1621,7 @@ module.exports = function (selector, context) {
 };
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1649,7 +1635,7 @@ module.exports = function (obj) {
 };
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
