@@ -603,6 +603,60 @@ export default class PhotoClip {
         }
     }
 
+    toDataURLCanvas(src, callback, outputFormat = 'image/jpeg') {
+        var img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function () {
+            var canvas = document.createElement('CANVAS');
+            var ctx = canvas.getContext('2d');
+            var dataURL;
+            canvas.height = this.naturalHeight;
+            canvas.width = this.naturalWidth;
+            ctx.drawImage(this, 0, 0);
+            dataURL = canvas.toDataURL(outputFormat);
+            callback(dataURL);
+        };
+        img.onerror = function (err) {
+            callback(null, err)
+        };
+        img.src = src;
+        if (img.complete || img.complete === undefined) {
+            img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+            img.src = src;
+        }
+    }
+
+    toDataURL(url, callback) {
+        if (!window.FileReader) {
+            this.toDataURLCanvas(url, callback)
+            return
+        }
+        if (window.fetch && window.Promise) {
+            return fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const reader = new FileReader()
+                    reader.onloadend = () => callback(reader.result)
+                    reader.onerror = (err) => callback(null, err)
+                    reader.readAsDataURL(blob)
+                })
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            var reader = new FileReader();
+            reader.onloadend = function () {
+                callback(reader.result);
+            }
+            reader.readAsDataURL(xhr.response);
+        };
+        xhr.onerror = function (err) {
+            callback(null, err);
+        }
+        xhr.open('GET', url);
+        xhr.responseType = 'blob';
+        xhr.send();
+    }
+
     handleFile(src) {
         const options = this._options,
             errorMsg = options.errorMsg;
@@ -616,8 +670,14 @@ export default class PhotoClip {
         options.loadStart.call(this, src);
 
         if (typeof src === 'string') {
-            this._clearImg();
-            this._createImg(src);
+            this.toDataURL(src, (base64, err) => {
+                if (err) {
+                    options.loadError.call(this, errorMsg.imgHandleError, err);
+                    return
+                }
+                this._clearImg();
+                this._createImg(base64);
+            })
         } else {
             var reader = new FileReader();
             reader.readAsDataURL(src);

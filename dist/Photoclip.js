@@ -894,6 +894,68 @@ var PhotoClip = function () {
             }
         }
     }, {
+        key: 'toDataURLCanvas',
+        value: function toDataURLCanvas(src, callback) {
+            var outputFormat = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'image/jpeg';
+
+            var img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = function () {
+                var canvas = document.createElement('CANVAS');
+                var ctx = canvas.getContext('2d');
+                var dataURL;
+                canvas.height = this.naturalHeight;
+                canvas.width = this.naturalWidth;
+                ctx.drawImage(this, 0, 0);
+                dataURL = canvas.toDataURL(outputFormat);
+                callback(dataURL);
+            };
+            img.onerror = function (err) {
+                callback(null, err);
+            };
+            img.src = src;
+            if (img.complete || img.complete === undefined) {
+                img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+                img.src = src;
+            }
+        }
+    }, {
+        key: 'toDataURL',
+        value: function toDataURL(url, callback) {
+            if (!window.FileReader) {
+                this.toDataURLCanvas(url, callback);
+                return;
+            }
+            if (window.fetch && window.Promise) {
+                return fetch(url).then(function (response) {
+                    return response.blob();
+                }).then(function (blob) {
+                    var reader = new FileReader();
+                    reader.onloadend = function () {
+                        return callback(reader.result);
+                    };
+                    reader.onerror = function (err) {
+                        return callback(null, err);
+                    };
+                    reader.readAsDataURL(blob);
+                });
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                var reader = new FileReader();
+                reader.onloadend = function () {
+                    callback(reader.result);
+                };
+                reader.readAsDataURL(xhr.response);
+            };
+            xhr.onerror = function (err) {
+                callback(null, err);
+            };
+            xhr.open('GET', url);
+            xhr.responseType = 'blob';
+            xhr.send();
+        }
+    }, {
         key: 'handleFile',
         value: function handleFile(src) {
             var _this5 = this;
@@ -910,8 +972,14 @@ var PhotoClip = function () {
             options.loadStart.call(this, src);
 
             if (typeof src === 'string') {
-                this._clearImg();
-                this._createImg(src);
+                this.toDataURL(src, function (base64, err) {
+                    if (err) {
+                        options.loadError.call(_this5, errorMsg.imgHandleError, err);
+                        return;
+                    }
+                    _this5._clearImg();
+                    _this5._createImg(base64);
+                });
             } else {
                 var reader = new FileReader();
                 reader.readAsDataURL(src);
