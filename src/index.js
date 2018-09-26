@@ -631,7 +631,7 @@ export default class PhotoClip {
             this.toDataURLCanvas(url, callback)
             return
         }
-        if (window.fetch && window.Promise) {
+        /* if (window.fetch && window.Promise) {
             return fetch(url)
                 .then(response => response.blob())
                 .then(blob => {
@@ -640,7 +640,7 @@ export default class PhotoClip {
                     reader.onerror = (err) => callback(null, err)
                     reader.readAsDataURL(blob)
                 })
-        }
+        } */
         var xhr = new XMLHttpRequest();
         xhr.onload = function () {
             var reader = new FileReader();
