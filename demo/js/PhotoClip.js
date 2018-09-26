@@ -926,20 +926,16 @@ var PhotoClip = function () {
                 this.toDataURLCanvas(url, callback);
                 return;
             }
-            if (window.fetch && window.Promise) {
-                return fetch(url).then(function (response) {
-                    return response.blob();
-                }).then(function (blob) {
-                    var reader = new FileReader();
-                    reader.onloadend = function () {
-                        return callback(reader.result);
-                    };
-                    reader.onerror = function (err) {
-                        return callback(null, err);
-                    };
-                    reader.readAsDataURL(blob);
-                });
-            }
+            /* if (window.fetch && window.Promise) {
+                return fetch(url)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const reader = new FileReader()
+                        reader.onloadend = () => callback(reader.result)
+                        reader.onerror = (err) => callback(null, err)
+                        reader.readAsDataURL(blob)
+                    })
+            } */
             var xhr = new XMLHttpRequest();
             xhr.onload = function () {
                 var reader = new FileReader();
