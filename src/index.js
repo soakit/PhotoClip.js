@@ -708,18 +708,22 @@ export default class PhotoClip {
 
         this._$img = new Image();
 
-        css(this._$img, {
+        /* css(this._$img, {
             'user-select': 'none',
             'pointer-events': 'none'
-        });
+        }); */
 
         this._$img.onload = e => {
             const img = e.target;
             this._imgLoaded = true;
             options.loadComplete.call(this, img);
 
-            this._$rotationLayer.appendChild(img);
-
+			// this._$rotationLayer.appendChild(img);
+            createElement(this._$rotationLayer, 'photo-clip-image-crop', {
+                'background-image': 'url(' + src + ')',
+                width: '100%',
+                height: '100%'
+            });
             hideAction([img, this._$moveLayer], () => {
                 this._resetScroll(img.naturalWidth, img.naturalHeight);
             });
